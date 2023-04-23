@@ -20,9 +20,9 @@ app.get("/", function (req, res) {
 });
 
 app.get("/api", (request, response) => {
-  response.setHeader("Content-Type", "text/html");
-  response.setHeader("Cache-Control", "s-max-age=1, stale-while-revalidate");
-  response.end();
+  const date = new Date();
+
+  response.json({ unix: date.getTime(), utc: date.toUTCString() });
 });
 
 // your first API endpoint...
@@ -33,13 +33,24 @@ app.get("/api/hello", function (req, res) {
 app.get("/api/:date", (request, response) => {
   const date = request.params.date;
 
-  let utcDate = new Date(date);
-
-  if (utcDate.toString() === "Invalid Date") {
-    utcDate = new Date(date * 1000);
+  if (!date) {
+    console.log("empty bruh");
   }
 
-  const unixTime = Math.floor(utcDate.getTime() / 1000);
+  let utcDate = new Date(date);
+
+  console.log(utcDate);
+
+  if (utcDate.toString() === "Invalid Date") {
+    utcDate = new Date(parseInt(date));
+
+    if (utcDate.toString() === "Invalid Date") {
+      response.json({ error: "Invalid Date" });
+      return;
+    }
+  }
+
+  const unixTime = utcDate.getTime();
 
   response.json({ unix: unixTime, utc: utcDate.toUTCString() });
 });
